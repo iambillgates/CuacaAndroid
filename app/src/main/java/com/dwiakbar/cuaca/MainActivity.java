@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity
                 _swipeRefreshLayout1.setRefreshing(true);
 
                 String kota = _etKota.getText().toString();
-                String url = "https://api.openweathermap.org/data/2.5/forecast?q=" + kota + "&appid=407131137742b8a235128d9974e574b9";
+                String url = "https://api.openweathermap.org/data/2.5/forecast?q=" + kota + "&appid=67f7f49f9fc7faea9580f7220ad08697";
 
                 AsyncHttpClient ahc = new AsyncHttpClient();
 
