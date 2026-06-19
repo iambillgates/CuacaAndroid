@@ -20,20 +20,27 @@ public class GpsActivity extends AppCompatActivity {
         Bundle param = getIntent().getBundleExtra("param");
 
         _koordinatTextView = findViewById(R.id.textView_koordinat);
-        _koordinatTextView.setText(param.getDouble("lat") + " X " + param.getDouble("lon"));
 
-        _webView1 = findViewById(R.id.wvMain);
+        if (param != null) {
+            double lat = param.getDouble("lat");
+            double lon = param.getDouble("lon");
 
-        String url = "https://www.google.com/maps" +
-                "?q=" + param.getDouble("lat") + "," + param.getDouble("lon") +
-                "&ll=" + param.getDouble("lat") + "," + param.getDouble("lon") +
-                "&z=18";
+            _koordinatTextView.setText(lat + " X " + lon);
 
-        WebSettings webSettings = _webView1.getSettings();
-        webSettings.setJavaScriptEnabled(true);
-        webSettings.setDomStorageEnabled(true);
+            _webView1 = findViewById(R.id.wvMain);
 
-        _webView1.setWebViewClient(new WebViewClient());
-        _webView1.loadUrl(url);
+            // UBAH DISINI: Format URL untuk OpenStreetMap dengan Marker/Pin
+            // #map=18/lat/lon adalah tingkat zoom dan pusat peta
+            // ?mlat=lat&mlon=lon adalah koordinat untuk memunculkan Pin (Marker) merah
+            String url = "https://www.openstreetmap.org/?mlat=" + lat + "&mlon=" + lon + "#map=18/" + lat + "/" + lon;
+
+            WebSettings webSettings = _webView1.getSettings();
+            webSettings.setJavaScriptEnabled(true);
+            webSettings.setDomStorageEnabled(true);
+
+            // Karena OSM ramah browser mobile, kita bisa pakai WebViewClient standar tanpa trik UserAgent
+            _webView1.setWebViewClient(new WebViewClient());
+            _webView1.loadUrl(url);
+        }
     }
 }
