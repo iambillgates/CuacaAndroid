@@ -48,4 +48,5 @@ dependencies {
     implementation("com.google.code.gson:gson:2.10.1")
     implementation("com.loopj.android:android-async-http:1.4.11")
     implementation("com.squareup.picasso:picasso:2.5.2")
+    implementation("com.github.bumptech.glide:glide:4.16.0")
 }

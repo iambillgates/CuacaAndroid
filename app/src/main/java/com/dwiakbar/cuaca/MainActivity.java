@@ -1,6 +1,10 @@
 package com.dwiakbar.cuaca;
 
+import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -91,6 +95,30 @@ public class MainActivity extends AppCompatActivity
 
                         _buttonView_cityInfo.setText(cityName + ", " + negara + " (Lat: " + lat + ", Lon: " + lon + ")");
 
+                        // --- NEW WIDGET SYNC LOGIC ---
+                        // --- UPDATED WIDGET SYNC LOGIC ---
+                        if (rm.getListModelList() != null && !rm.getListModelList().isEmpty()) {
+                            // 1. Fetch temp range
+                            double tempMinCelsius = rm.getListModelList().get(0).getMainModel().getTemp_min() - 273.15;
+                            double tempMaxCelsius = rm.getListModelList().get(0).getMainModel().getTemp_max() - 273.15;
+                            String formattedTempRange = String.format("%.1f - %.1f°C", tempMinCelsius, tempMaxCelsius);
+
+                            // 2. Fetch condition text AND the network icon code string
+                            String weatherCondition = "Clear";
+                            String iconCode = "01d"; // Default fallback icon code (clear sky day)
+
+                            if (rm.getListModelList().get(0).getWeatherModelList() != null &&
+                                    !rm.getListModelList().get(0).getWeatherModelList().isEmpty()) {
+
+                                weatherCondition = rm.getListModelList().get(0).getWeatherModelList().get(0).getMain();
+                                iconCode = rm.getListModelList().get(0).getWeatherModelList().get(0).getIcon(); // GET ICON CODE
+                            }
+
+                            // 3. Save to SharedPreferences and trigger Widget broadcast
+                            updateWidgetData(cityName, formattedTempRange, weatherCondition, iconCode);
+                        }
+                        // ------------------------------
+
                         init_buttonView_cityInfo(rm);
                     }
 
@@ -102,6 +130,26 @@ public class MainActivity extends AppCompatActivity
                 });
             }
         });
+    }
+
+    // Helper method to update the SharedPreferences cache and notify WidgetProvider
+    private void updateWidgetData(String cityName, String temperature, String condition, String iconCode) {
+        SharedPreferences prefs = getSharedPreferences("WeatherPrefs", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString("city", cityName);
+        editor.putString("temp", temperature);
+        editor.putString("condition", condition);
+        editor.putString("icon_code", iconCode); // Save here
+        editor.apply();
+
+        Intent intent = new Intent(this, WeatherWidgetProvider.class);
+        intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+
+        int[] ids = AppWidgetManager.getInstance(getApplication())
+                .getAppWidgetIds(new ComponentName(getApplication(), WeatherWidgetProvider.class));
+        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids);
+
+        sendBroadcast(intent);
     }
 
     private void init_buttonView_cityInfo(RootModel rm)
